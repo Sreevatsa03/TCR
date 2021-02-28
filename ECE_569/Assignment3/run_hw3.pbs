@@ -1,0 +1,79 @@
+#!/bin/bash
+
+### script to run an mpi job using 28 cores or less (using only one 28-core node)
+
+### Set the job name
+#PBS -N hw3
+
+### Specify the group for this job
+### List of PI groups available to each user can be found with "va" command
+#PBS -W group_list=ece569
+
+### Set the queue for this job as windfall or standard (adjust ### and #)
+#PBS -q standard
+
+### Set the number of nodes, cores and memory that will be used for this job
+### select=1 is the node count, ncpus=28 are the cores in each node, 
+### mem=168gb is memory per node, pcmem=6gb is the memory per core - optional
+
+###PBS -l select=1:ncpus=28:mem=168gb:ngpus1
+#PBS -l select=1:ncpus=2:mem=12gb:ngpus=1
+### Specify "wallclock time", hhh:mm:ss. Required field
+#PBS -l walltime=00:00:10
+
+### Specify total cpu time, hhh:mm:ss. Calculated for you if left out
+### total cputime = walltime * ncpus
+#PBS -l cput=00:00:20
+
+### Load required modules/libraries if needed (openmpi example)
+### Use "module avail" command to list all available modules
+module load openmpi
+module load cuda91/toolkit/9.1.85
+### set directory for job execution, ~netid = home directory path
+cd ~akoglu/Spring2021/ece569/build_dir
+
+###
+###setenv MPI_DSM_DISTRIBUTE
+
+### run your executable program with begin and end date and time output
+
+PATHS[0]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/0;
+PATHS[1]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/1;
+PATHS[2]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/2;
+PATHS[3]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/3;
+PATHS[4]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/4;
+PATHS[5]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/5;
+PATHS[6]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/6;
+PATHS[7]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/7;
+PATHS[8]=/home/u26/akoglu/Spring2021/ece569/build_dir/MatrixMultiplication/Dataset/8;
+
+
+
+count=0
+for i in ${PATHS[@]}
+do
+   file=output$((count)).txt
+   /usr/bin/time mpirun -n 1 ./BasicMatrixMultiplication_Solution -e $i/output.raw -i $i/input0.raw,$i/input1.raw -t matrix > BasicMatrixMultiplication_output/$file
+ count=$((count+1))
+done
+
+PATHS[0]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/0;
+PATHS[1]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/1;
+PATHS[2]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/2;
+PATHS[3]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/3;
+PATHS[4]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/4;
+PATHS[5]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/5;
+PATHS[6]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/6;
+PATHS[7]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/7;
+PATHS[8]=/home/u26/akoglu/Spring2021/ece569/build_dir/TiledMatrixMultiplication/Dataset/8;
+
+count=0
+for j in ${PATHS[@]}
+do
+   file=output$((count)).txt
+   /usr/bin/time mpirun -n 1 ./TiledMatrixMultiplication_Solution -e $j/output.raw -i $j/input0.raw,$j/input1.raw -t matrix > TiledMatrixMultiplication_output/$file
+ count=$((count+1))
+done
+
+
+
